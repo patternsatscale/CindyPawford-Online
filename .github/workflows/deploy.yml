@@ -1,0 +1,85 @@
+name: Deploy Cindy Pawford Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+concurrency:
+  group: cindy-production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Deploy to S3 & CloudFront
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Validate & Guard Platform Shell
+        run: |
+          if [ ! -f "_platform/shell.js" ]; then
+            echo "::error::_platform/shell.js is missing from repository!"
+            exit 1
+          fi
+          if ! grep -q "/_platform/shell.js" index.html; then
+            echo "--> Injecting platform shell into index.html..."
+            sed -i 's|</body>|  <script src="/_platform/shell.js" defer></script>\n</body>|' index.html
+          fi
+
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION || 'us-east-1' }}
+
+      - name: Resolve Deployment Targets
+        run: |
+          # 1. Resolve Production S3 Bucket
+          BUCKET="${{ vars.PRODUCTION_BUCKET }}"
+          if [ -z "${BUCKET}" ]; then
+            BUCKET=$(aws s3api list-buckets --query "Buckets[?contains(Name, 'productionsiteassets') && contains(Name, 'cindy-pawford')].Name" --output text || true)
+          fi
+          if [ -z "${BUCKET}" ] || [ "${BUCKET}" = "None" ]; then
+            echo "::error::Could not resolve target production S3 bucket!"
+            exit 1
+          fi
+          echo "PRODUCTION_BUCKET=${BUCKET}" >> $GITHUB_ENV
+          echo "Target S3 Bucket: ${BUCKET}"
+
+          # 2. Resolve CloudFront Distribution ID
+          DIST_ID="${{ vars.CLOUDFRONT_DISTRIBUTION_ID }}"
+          if [ -z "${DIST_ID}" ]; then
+            DIST_ID=$(aws cloudfront list-distributions --query "DistributionList.Items[?Aliases.Items && contains(Aliases.Items, 'cindypawford.com')].Id" --output text || true)
+          fi
+          if [ -z "${DIST_ID}" ] || [ "${DIST_ID}" = "None" ]; then
+            echo "::error::Could not resolve CloudFront distribution for cindypawford.com!"
+            exit 1
+          fi
+          echo "CLOUDFRONT_DISTRIBUTION_ID=${DIST_ID}" >> $GITHUB_ENV
+          echo "Target CloudFront Distribution: ${DIST_ID}"
+
+      - name: Deploy Static Assets to S3
+        run: |
+          echo "--> Syncing canvas assets to s3://${PRODUCTION_BUCKET}/..."
+          aws s3 sync . "s3://${PRODUCTION_BUCKET}/" \
+            --delete \
+            --exclude ".git/*" \
+            --exclude ".github/*"
+          echo "--> S3 asset synchronization completed successfully."
+
+      - name: Invalidate CloudFront CDN Cache
+        run: |
+          echo "--> Requesting wildcard cache invalidation (/*) on ${CLOUDFRONT_DISTRIBUTION_ID}..."
+          INVALIDATION_ID=$(aws cloudfront create-invalidation \
+            --distribution-id "${CLOUDFRONT_DISTRIBUTION_ID}" \
+            --paths "/*" \
+            --query "Invalidation.Id" \
+            --output text)
+          echo "--> Successfully created CloudFront invalidation ID: ${INVALIDATION_ID}"

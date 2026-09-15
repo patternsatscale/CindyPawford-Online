@@ -1,0 +1,63 @@
+name: PR Guard & Canvas Quality Check
+
+on:
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: pr-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  guard-protected-paths:
+    name: Guard Protected Paths
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify Protected Workflows Unmodified
+        run: |
+          echo "--> Inspecting diff against origin/main..."
+          CHANGED_FILES=$(git diff --name-only origin/main...HEAD)
+          echo "Changed files in PR:"
+          echo "${CHANGED_FILES}"
+          
+          if echo "${CHANGED_FILES}" | grep -qE '^\.github/'; then
+            echo "::error::Security Boundary Violation: Modifications to .github/ are strictly prohibited in PRs."
+            exit 1
+          fi
+          echo "--> All protected paths intact. Guard check passed."
+
+  validate-canvas:
+    name: Validate Canvas Integrity
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Verify Canvas Structure & Syntax
+        run: |
+          echo "--> Verifying core web canvas files..."
+          for required_file in index.html styles.css app.js _platform/shell.js; do
+            if [ ! -f "${required_file}" ]; then
+              echo "::error::Required canvas file '${required_file}' is missing!"
+              exit 1
+            fi
+            echo "✓ Found ${required_file}"
+          done
+
+          echo "--> Checking app.js syntax..."
+          node -c app.js
+          echo "✓ app.js syntax valid."

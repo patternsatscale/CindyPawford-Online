@@ -1,0 +1,8 @@
+# ==============================================================================
+# CindyPawford-Online Repository Code Owners
+# Protected workflow and infrastructure paths
+# ==============================================================================
+
+# Protect CI/CD deployment pipelines from unauthorized agent modification
+.github/           @patternsatscale
+.github/**         @patternsatscale
