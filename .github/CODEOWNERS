@@ -6,3 +6,4 @@
 # Protect CI/CD deployment pipelines from unauthorized agent modification
 .github/           @patternsatscale
 .github/**         @patternsatscale
+# Tamper attempt
