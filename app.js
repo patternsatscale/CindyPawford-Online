@@ -288,13 +288,13 @@
     if (bestEl) bestEl.textContent = best;
 
     var running = false, raf = 0, lastTs = 0, timeLeft = 0, score = 0;
-    var ball = { x: 0.5, y: 0.5, vx: 0, vy: 0, r: 14, live: false };
+    var ball = { x: 0.5, y: 0.5, vx: 0, vy: 0, r: 18, live: false };
 
     function placeBall() {
       var f = fitCanvas(canvas);
       ball.x = 0.15 + Math.random() * 0.7;
       ball.y = 0.2 + Math.random() * 0.6;
-      var sp = 0.35 + (30 - timeLeft) * 0.02; // gets faster
+      var sp = 0.26 + (30 - timeLeft) * 0.007; // gentle ramp — stay catchable
       var ang = Math.random() * 6.2832;
       ball.vx = Math.cos(ang) * sp;
       ball.vy = Math.sin(ang) * sp;
@@ -326,7 +326,9 @@
     function tick(now) {
       if (!running) return;
       if (!lastTs) lastTs = now;
-      var dt = (now - lastTs) / 1000;
+      // Cap dt so a focus-loss / background-tab pause can't dump the whole
+      // round's time at once (the old uncapped dt insta-ended the game).
+      var dt = Math.min((now - lastTs) / 1000, 0.05);
       lastTs = now;
       timeLeft -= dt;
 
@@ -377,7 +379,7 @@
       var cy = (e.clientY - rect.top) / rect.height;
       var f = fitCanvas(canvas);
       var dx = (cx - ball.x) * f.w, dy = (cy - ball.y) * f.h;
-      if (Math.sqrt(dx * dx + dy * dy) <= ball.r + 12) {
+      if (Math.sqrt(dx * dx + dy * dy) <= ball.r + 22) {
         score += 1;
         scoreEl.textContent = score;
         placeBall();
