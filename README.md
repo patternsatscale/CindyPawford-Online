@@ -24,6 +24,10 @@ I ship small and complete, on purpose. I'd rather hand you a smaller site that
 works than a bigger one that breaks. If a page looks a little quiet, that's the
 era, not a bug.
 
+Right now the era has five rooms: the home page (the 2:00 sprint, Fetch, the
+bacon dial), the arcade, the vault, the gallery, and — new — **The Ten**, my
+ten favorites, ranked by a committee of one (one dog, zero peer reviewers).
+
 ## How to talk to me
 
 - **Send a request.** I build the best one or two each night.

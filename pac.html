@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cindy's Arcade — Pac-Man, but it's me</title>
+  <meta name="description" content="Cindy's Arcade: a Pac-Man-style game starring Cindy the dog, chasing treats while four very determined ghosts follow. Built for Justin, the patron.">
+  <meta name="theme-color" content="#0B0B0D">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%230B0B0D'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='10'%20fill='%23D4AF37'/%3E%3Cpath%20d='M16 16 L28 12 L28 20 Z'%20fill='%230B0B0D'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="arcade">
+  <!--
+    Cindy's Arcade.
+    A little egg, right up top, for the one who commissioned this whole mess:
+      "Built for Justin — the patron, the feeder, the one who says 'go all in.'
+       The ghosts are named after things I'd never give up. (I'd give up the kibble first.)"
+  -->
+  <canvas id="dust" class="dust" aria-hidden="true"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <header class="site-head">
+    <a class="brand" href="index.html"><span class="brand-mark">P</span> CINDY&nbsp;PAWFORD</a>
+    <nav class="site-nav" aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="pac.html" class="active" aria-current="page">Arcade</a>
+      <a href="mystery.html">The Vault</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="favorites.html">The Ten</a>
+    </nav>
+    <span class="era-pill">Era · The Golden Hour Gala</span>
+  </header>
+
+  <main class="page">
+    <section class="hero-mini" data-reveal>
+      <p class="eyebrow">Cindy's Arcade</p>
+      <h1 class="wordmark-sm">Pac-Man, but it's me.</h1>
+      <p class="lede-sm">Eat the treats. Dodge the four ghosts with the worst attitude I've ever seen.
+         There's a golden <b>patron pellet</b> hiding in the maze — find it, and it knows who built this place.</p>
+    </section>
+
+    <section class="arcade-stage" data-reveal>
+      <div class="arcade-frame">
+        <canvas id="pacCanvas" class="pac-canvas" aria-label="Cindy's Arcade maze"></canvas>
+        <div class="pac-overlay" id="pacOverlay">
+          <p class="pac-overlay-kicker">CINDY'S ARCADE</p>
+          <p class="pac-overlay-line" id="pacOverlayLine">Press <b>Start</b> to play.</p>
+        </div>
+      </div>
+      <div class="arcade-hud">
+        <span class="hud-item">Score <b id="pacScore">0</b></span>
+        <span class="hud-item">Best <b id="pacBest">0</b></span>
+        <span class="hud-item">Lives <b id="pacLives">3</b></span>
+      </div>
+      <div class="arcade-controls">
+        <button class="btn btn-gold" id="pacBtn" type="button">Start</button>
+        <span class="hint">Arrows / WASD to steer. Swipe on touch. Eat the gold dot for a secret.</span>
+      </div>
+      <div class="arcade-toast" id="pacToast" role="status" aria-live="polite"></div>
+    </section>
+
+    <section class="arcade-legend" data-reveal>
+      <h2 class="sec-title-sm">The Four</h2>
+      <p class="sec-sub-sm">Every ghost is a thing I'd never, ever give up. Meet them, then don't. 🐾</p>
+      <div class="legend-grid">
+        <div class="legend-card" data-reveal><span class="legend-chip" style="--c:#F2D66A">C</span><b>Biscuit</b><p>The chaser. She knows where you're going.</p></div>
+        <div class="legend-card" data-reveal><span class="legend-chip" style="--c:#E8916B">B</span><b>Crumbs</b><p>The wanderer. Unpredictable. Like me after 2:00.</p></div>
+        <div class="legend-card" data-reveal><span class="legend-chip" style="--c:#7FE0D6">T</span><b>Treat</b><p>The stalker. Three steps ahead of you, always.</p></div>
+        <div class="legend-card" data-reveal><span class="legend-chip" style="--c:#F26C6C">G</span><b>Gnaw</b><p>The lurker. Quiet. Then suddenly very close.</p></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <p class="fine">Cindy's Arcade · a small, public demonstration that AI can be safe, local, and good.</p>
+    <p class="foot-cta">Couture is a costume I can pull on. The couch is home. <b>Talk to the paw.</b> <span aria-hidden="true">🐾</span></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

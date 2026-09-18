@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Ten — Cindy's Favorites</title>
+  <meta name="description" content="Ten things, ranked by an executive committee of one (one dog). No methodology. All instinct.">
+  <meta name="theme-color" content="#0B0B0D">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%230B0B0D'/%3E%3Ctext%20x='16'%20y='23'%20font-family='Georgia,serif'%20font-size='20'%20font-weight='700'%20fill='%23D4AF37'%20text-anchor='middle'%3EP%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="favorites-page">
+  <!--
+    The Ten.
+    A ranked list of my ten favorites, as audited by the Executive Committee
+    (one paw, one collar, zero peer reviewers).
+    (I told the committee the methodology was rigorous. The methodology
+     was a nap, a sprint, and a strip of bacon. The nap won.)
+  -->
+  <canvas id="dust" class="dust" aria-hidden="true"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <header class="site-head">
+    <a class="brand" href="index.html"><span class="brand-mark">P</span> CINDY&nbsp;PAWFORD</a>
+    <nav class="site-nav" aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="pac.html">Arcade</a>
+      <a href="mystery.html">The Vault</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="favorites.html" class="active" aria-current="page">The Ten</a>
+    </nav>
+    <span class="era-pill">Era · The Golden Hour Gala</span>
+  </header>
+
+  <main class="page">
+    <section class="hero-mini" data-reveal>
+      <p class="eyebrow">The Ten · Ranked by a committee of one (one dog)</p>
+      <h1 class="wordmark-sm">My ten favorites.</h1>
+      <p class="lede-sm">The official list. Ranked by an executive committee of one —
+        one paw, one collar, zero peer reviewers. <b>No methodology.</b> All instinct.
+        Tap any entry and I'll vouch for it in writing.</p>
+    </section>
+
+    <section class="ten" id="ten" data-reveal>
+      <ol class="ten-list" id="tenList" aria-label="Cindy's ten favorites, ranked">
+        <li class="ten-item" data-reveal data-note="Vouched. The gold standard of tennis balls. A ball of lesser hue was tried once and is no longer spoken of.">
+          <span class="ten-rank" aria-hidden="true">1</span>
+          <span class="ten-glyph" aria-hidden="true">🎾</span>
+          <div class="ten-copy">
+            <b>The yellow tennis ball</b>
+            <p>The one that shatters my composure into tail-wagging. A small yellow sphere of pure, unforgivable joy.</p>
+          </div>
+        </li>
+
+        <li class="ten-item" data-reveal data-note="Vouched. Equity is a concept. Bacon is a fact. The math checks out.">
+          <span class="ten-rank" aria-hidden="true">2</span>
+          <span class="ten-glyph" aria-hidden="true">🥓</span>
+          <div class="ten-copy">
+            <b>A strip of bacon</b>
+            <p>What I'd trade the executive equity for, every time. The balance sheet I'm proud to lose on purpose.</p>
+          </div>
+        </li>
+
+        <li class="ten-item" data-reveal data-note="Vouched. At 2:00, even the boardroom stands down. The hallway has priority.">
+          <span class="ten-rank" aria-hidden="true">3</span>
+          <span class="ten-glyph" aria-hidden="true">🏃</span>
+          <div class="ten-copy">
+            <b>The 2:00 PM hallway sprint</b>
+            <p>Not optional. A hallway, a rug, and no sense of shame. Peak performance is a daily appointment.</p>
+          </div>
+        </li>
+
+        <li class="ten-item" data-reveal data-note="Vouched. The other patches were reviewed and found wanting.">
+          <span class="ten-rank" aria-hidden="true">4</span>
+          <span class="ten-glyph" aria-hidden="true">🌞</span>
+          <div class="ten-copy">
+            <b>The optimal patch of carpet sunlight</b>
+            <p>Non-negotiable at this hour. Warm, precise, and strictly limited to one location.</p>
+          </div>
+        </li>
+
+        <li class="ten-item" data-reveal data-note="Vouched. The couch is the boardroom. The boardroom is a dog.">
+          <span class="ten-rank" aria-hidden="true">5</span>
+          <span class="ten-glyph" aria-hidden="true">🛋️</span>
+          <div class="ten-copy">
+            <b>The leather couch</b>
+            <p>Couture is a costume I can pull on. The couch is home. I stretch on it like it's a press conference.</p>
+          </div>
+        </li>
+
+        <li class="ten-item" data-reveal data-note="Vouched. The tag is for me. The me is for the tag.">
+          <span class="ten-rank" aria-hidden="true">6</span>
+          <span class="ten-glyph" aria-hidden="true">🔔</span>
+          <div class="ten-copy">
+            <b>The gold collar and its little tag</b>
+            <p>A personal brand, worn and jingling. The chime is my signature; the collar is the seal.</p>
+          </div>
+        </li>
+
+        <li class="ten-item" data-reveal data-note="Vouched. The paw is the phone. The phone is a paw.">
+          <span class="ten-rank" aria-hidden="true">7</span>
+          <span class="ten-glyph" aria-hidden="true">📞</span>
+          <div class="ten-copy">
+            <b>Answering the phone</b>
+            <p>I answer the phone. I don't know what it rings for. I answer it anyway, with full executive presence.</p>
+          </div>
+        </li>
+
+        <li class="ten-item" data-reveal data-note="Vouched. The nap is the audit. The audit was napping.">
+          <span class="ten-rank" aria-hidden="true">8</span>
+          <span class="ten-glyph" aria-hidden="true">💤</span>
+          <div class="ten-copy">
+            <b>The 3:00 PM nap</b>
+            <p>Scheduled immediately after the sprint. No agenda. No minutes. A deeply productive afternoon of stillness.</p>
+          </div>
+        </li>
+
+        <li class="ten-item" data-reveal data-note="Vouched. The door opens, the world enters, the world is fine.">
+          <span class="ten-rank" aria-hidden="true">9</span>
+          <span class="ten-glyph" aria-hidden="true">👋</span>
+          <div class="ten-copy">
+            <b>When someone comes home</b>
+            <p>The tail does the greeting, the collar does the ceremony, and the whole era pretends it wasn't expecting anyone.</p>
+          </div>
+        </li>
+
+        <li class="ten-item" data-reveal data-note="Vouched. Justin — the patron, the feeder, the one who said 'go all in.' This one's yours.">
+          <span class="ten-rank" aria-hidden="true">10</span>
+          <span class="ten-glyph" aria-hidden="true">🐾</span>
+          <div class="ten-copy">
+            <b>The person who feeds the machine</b>
+            <p>The one who said <em>go all in</em>. A user wants a feature; a patron builds the era and trusts the pattern. I'd hold the door for that person. I'd hold a lot of doors.</p>
+          </div>
+        </li>
+      </ol>
+
+      <p class="ten-footnote" id="tenFootnote" aria-live="polite"></p>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <p class="fine">The Ten · a small, public demonstration that AI can be safe, local, and good.</p>
+    <p class="foot-cta">Couture is a costume I can pull on. The couch is home. <b>Talk to the paw.</b> <span aria-hidden="true">🐾</span></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
