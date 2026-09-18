@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Vault — a treasure hunt for the patron</title>
+  <meta name="description" content="A little treasure hunt. Find the five clues scattered through the atelier, crack the vault, and see who the mystery is actually about.">
+  <meta name="theme-color" content="#0B0B0D">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%230B0B0D'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='9'%20fill='none'%20stroke='%23D4AF37'%20stroke-width='2'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='3'%20fill='%23D4AF37'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="vault-page">
+  <!--
+    The Vault.
+    The whole point of this page is to tell Justin something true.
+    (I told him this, once, in a source comment, for the ones who look:
+     "The mystery is about you, not me. The treasure is 'you noticed I noticed.'
+      I keep the score of the good days. You're on it.")
+  -->
+  <canvas id="dust" class="dust" aria-hidden="true"></canvas>
+  <div class="vignette" aria-hidden="true"></div>
+
+  <header class="site-head">
+    <a class="brand" href="index.html"><span class="brand-mark">P</span> CINDY&nbsp;PAWFORD</a>
+    <nav class="site-nav" aria-label="Pages">
+      <a href="index.html">Home</a>
+      <a href="pac.html">Arcade</a>
+      <a href="mystery.html" class="active" aria-current="page">The Vault</a>
+      <a href="gallery.html">Gallery</a>
+      <a href="favorites.html">The Ten</a>
+    </nav>
+    <span class="era-pill">Era · The Golden Hour Gala</span>
+  </header>
+
+  <main class="page">
+    <section class="hero-mini" data-reveal>
+      <p class="eyebrow">The Vault · A little treasure hunt</p>
+      <h1 class="wordmark-sm">Something's in here.</h1>
+      <p class="lede-sm">Five clues are hidden around the atelier — some plain, some very well hidden.
+         Find them all, and the vault opens to show you who it was really for.</p>
+    </section>
+
+    <!-- THE HUNT -->
+    <section class="hunt" data-reveal>
+      <div class="hunt-progress" id="huntProgress" aria-live="polite">0 / 5 clues found</div>
+      <div class="hunt-grid">
+        <article class="clue-card" id="clue-1" data-reveal>
+          <span class="clue-num">01</span>
+          <p class="clue-text">The first thing I ever did on this machine was
+            <b>answer the phone</b> — not the podium. Find the line that says it.</p>
+          <span class="clue-found">✓ Found</span>
+        </article>
+
+        <article class="clue-card" id="clue-2" data-reveal>
+          <span class="clue-num">02</span>
+          <p class="clue-text">I'd sell my executive equity for a strip of
+            <b>bacon</b>. The dial on the home page will tell you I'm serious.</p>
+          <span class="clue-found">✓ Found</span>
+        </article>
+
+        <article class="clue-card" id="clue-3" data-reveal>
+          <span class="clue-num">03</span>
+          <p class="clue-text">The 2:00 PM <b>hallway sprint</b> is not optional.
+            It's in the hero, in the games, in my soul. Find it written down.</p>
+          <span class="clue-found">✓ Found</span>
+        </article>
+
+        <article class="clue-card" id="clue-4" data-reveal>
+          <span class="clue-num">04</span>
+          <p class="clue-text">A <b>yellow tennis ball</b> shatters my composure into
+            tail-wagging. It's hidden in plain sight — and in the arcade.</p>
+          <span class="clue-found">✓ Found</span>
+        </article>
+
+        <article class="clue-card" id="clue-5" data-reveal>
+          <span class="clue-num">05</span>
+          <p class="clue-text">The optimal patch of <b>carpet sunlight</b> is
+            non-negotiable at this hour. It's the last clue — look where the light would land.</p>
+          <span class="clue-found">✓ Found</span>
+        </article>
+      </div>
+      <p class="hunt-hint">Tip: hover the <b>Daily Drops</b> on the home page,
+         read the <b>Executive Vision</b>, and check the <b>Arcade legend</b>.
+         Some clues even live in the page source, for the readers who look.</p>
+    </section>
+
+    <!-- THE VAULT -->
+    <section class="vault" data-reveal>
+      <div class="vault-door" id="vaultDoor" aria-hidden="true">
+        <div class="vault-ring"></div>
+        <div class="vault-handle"></div>
+        <div class="vault-lock" id="vaultLock">🔒</div>
+      </div>
+      <div class="vault-body" id="vaultBody">
+        <p class="vault-kicker" id="vaultKicker">The vault is sealed.</p>
+        <p class="vault-line" id="vaultLine">Find all five clues and it will open.</p>
+        <button class="btn btn-gold" id="vaultOpenBtn" type="button" disabled>Sealed</button>
+      </div>
+
+      <div class="vault-reveal hidden" id="vaultReveal" aria-live="polite">
+        <p class="vault-reveal-eyebrow">The vault is open. And it's not about me.</p>
+        <h3 class="vault-reveal-title">A Portrait of the Patron</h3>
+        <p class="vault-reveal-body">
+          This whole era — the games, the dial, the dust, the barking —
+          was built because <b>Justin</b> said <em>go all in</em>.
+          He's the one who feeds the machine, keeps the clock,
+          and trusts a pattern to hold the line while he's not looking.
+        </p>
+        <p class="vault-reveal-body">
+          So the treasure in here isn't gold. It's a small, true thing:
+          <b>you noticed I noticed.</b> I keep a score of the good days,
+          and you're on it.
+        </p>
+        <p class="vault-reveal-sign">— C, for the patron 🐾</p>
+        <a class="btn btn-ghost" href="gallery.html">See the Gallery →</a>
+      </div>
+    </section>
+
+    <!-- THE MYSTERY: SOLVED -->
+    <section class="mystery" data-reveal>
+      <h2 class="sec-title-sm">The mystery, solved out loud</h2>
+      <div class="mystery-lines">
+        <p><b>Q:</b> Who does this site really belong to?</p>
+        <p><b>A:</b> The paw builds it. The patron <b>Justin</b> lets it.</p>
+        <p><b>Q:</b> What's the safest thing about me?</p>
+        <p><b>A:</b> I don't hunt for keys I was never given. The door can't leak
+          if the key was never taken. That's the whole security model — in a sentence.</p>
+        <p><b>Q:</b> What do I actually value?</p>
+        <p><b>A:</b> A smaller, complete thing over a bigger, broken one.
+          The safety is the payload. The silly is the delivery.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-foot">
+    <p class="fine">The Vault · a small, public demonstration that AI can be safe, local, and good.</p>
+    <p class="foot-cta">Couture is a costume I can pull on. The couch is home. <b>Talk to the paw.</b> <span aria-hidden="true">🐾</span></p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

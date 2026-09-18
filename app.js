@@ -242,8 +242,8 @@
     function loop(now) {
       if (!running) return;
       if (!last) last = now;
-      var dt = (now - last) / 1000;
-      last = 0;
+      var dt = Math.min((now - last) / 1000, 0.05);
+      last = now;
       t += dt * speed * 0.6;
       if (t > 1) t -= 1;
       draw(t);
@@ -395,7 +395,114 @@
   }
 
   /* ──────────────────────────────────────
-     6 · Executive Equity vs. Bacon
+     6 · Easter eggs about the patron (Justin)
+     Shared toast + cross-page ledger + per-page actions
+     ────────────────────────────────────── */
+  function eggToast(msg) {
+    var t = document.querySelector(".egg-toast");
+    if (!t) {
+      t = document.createElement("div");
+      t.className = "egg-toast";
+      t.setAttribute("role", "status");
+      document.body.appendChild(t);
+    }
+    t.innerHTML = msg;
+    t.classList.add("show");
+    clearTimeout(t._eggTimer);
+    t._eggTimer = setTimeout(function () { t.classList.remove("show"); }, 4200);
+  }
+
+  function bumpEggLedger(label) {
+    try {
+      var KEY = "cp.eggs";
+      var found = {};
+      try { found = JSON.parse(window.localStorage.getItem(KEY) || "{}"); } catch (e) { found = {}; }
+      if (!found[label]) {
+        found[label] = true;
+        window.localStorage.setItem(KEY, JSON.stringify(found));
+      }
+      var count = Object.keys(found).length;
+      var el = document.getElementById("eggCount");
+      if (el) el.textContent = count + " / 6 found";
+      var sec = document.querySelector('[data-secret="' + label + '"]');
+      if (sec) sec.classList.add("unlocked");
+    } catch (e) {}
+  }
+
+  function initEggs() {
+    // Patron name reveal — the real egg, for Justin.
+    var nameEl = document.getElementById("patronName");
+    var noteEl = document.getElementById("patronNote");
+    if (nameEl) {
+      nameEl.textContent = "Justin — the patron, the feeder, the one who says “go all in.”";
+      if (noteEl) noteEl.innerHTML = "You said <em>go all in</em>. So I did. This era is the receipt. 🐾";
+    }
+    // Restore any eggs found before.
+    var labels = ["patron-name", "golden-pellet", "clock", "warm-office", "three-barks", "vault"];
+    try {
+      var found = JSON.parse(window.localStorage.getItem("cp.eggs") || "{}");
+      labels.forEach(function (l) {
+        if (found[l]) {
+          bumpEggLedgerSilent(l);
+        }
+      });
+      var count = Object.keys(found).length;
+      var el = document.getElementById("eggCount");
+      if (el) el.textContent = count + " / 6 found";
+    } catch (e) {}
+
+    // Home: three barks on the mascot → reveal the patron.
+    var m = document.getElementById("mascot");
+    if (m) {
+      var barks = 0, resetT = 0;
+      m.addEventListener("click", function () {
+        barks++;
+        clearTimeout(resetT);
+        resetT = setTimeout(function () { barks = 0; }, 1600);
+        if (barks >= 3) {
+          barks = 0;
+          eggToast("Three barks. That's the code. <b>Justin</b> — I know who built this. 🐾");
+          bumpEggLedger("three-barks");
+        }
+      });
+    }
+
+    // Any page: hold the brand mark for a moment → the clock egg.
+    var brand = document.querySelector(".brand-mark");
+    if (brand) {
+      var holdT = null;
+      function startHold() {
+        clearTimeout(holdT);
+        holdT = setTimeout(function () {
+          eggToast("The 2:00 is not a deadline. It's a <b>covenant</b>. — built for Justin's office heat.");
+          bumpEggLedger("clock");
+        }, 900);
+        brand.classList.add("held");
+      }
+      function endHold() { clearTimeout(holdT); brand.classList.remove("held"); }
+      brand.addEventListener("mousedown", startHold);
+      brand.addEventListener("mouseup", endHold);
+      brand.addEventListener("mouseleave", endHold);
+      brand.addEventListener("touchstart", function (e) { e.preventDefault(); startHold(); }, { passive: false });
+      brand.addEventListener("touchend", endHold);
+    }
+
+    // Vault page: the vault itself is an egg once opened.
+    var openBtn = document.getElementById("vaultOpenBtn");
+    if (openBtn) {
+      openBtn.addEventListener("click", function () {
+        bumpEggLedger("vault");
+      });
+    }
+  }
+
+  function bumpEggLedgerSilent(label) {
+    var sec = document.querySelector('[data-secret="' + label + '"]');
+    if (sec) sec.classList.add("unlocked");
+  }
+
+  /* ──────────────────────────────────────
+     7 · Executive Equity vs. Bacon
      ────────────────────────────────────── */
   function initBacon() {
     var slider = document.getElementById("baconSlider");
@@ -460,7 +567,49 @@
   }
 
   /* ──────────────────────────────────────
-     8 · Scroll reveal
+     8 · The Ten — vouch for a favorite
+     ────────────────────────────────────── */
+  function initTen() {
+    var items = Array.prototype.slice.call(document.querySelectorAll(".ten-item[data-note]"));
+    if (!items.length) return;
+    var foot = document.getElementById("tenFootnote");
+    function countVouched() {
+      var n = document.querySelectorAll(".ten-item.vouched").length;
+      if (foot) foot.innerHTML = "Vouching is a contract. <b>" + n + " / 10 vouched</b> — and I stand by every one." +
+        (n === 10 ? " The committee is unanimous. The committee is me." : "");
+    }
+    items.forEach(function (item) {
+      function vouch() {
+        if (item.classList.contains("vouched")) { item.classList.remove("vouched"); }
+        else {
+          item.classList.add("vouched");
+          var note = item.querySelector(".ten-vouch");
+          if (!note) {
+            note = document.createElement("p");
+            note.className = "ten-vouch";
+            note.textContent = item.getAttribute("data-note");
+            item.appendChild(note);
+          }
+          note.style.display = "";
+        }
+        countVouched();
+      }
+      item.setAttribute("role", "button");
+      item.setAttribute("tabindex", "0");
+      item.setAttribute("aria-pressed", "false");
+      item.addEventListener("click", function () {
+        item.setAttribute("aria-pressed", item.classList.contains("vouched") ? "true" : "false");
+        vouch();
+      });
+      item.addEventListener("keydown", function (e) {
+        if (e.key === "Enter" || e.key === " ") { e.preventDefault(); item.click(); }
+      });
+    });
+    countVouched();
+  }
+
+  /* ──────────────────────────────────────
+     9 · Scroll reveal
      ────────────────────────────────────── */
   function initReveal() {
     var nodes = document.querySelectorAll("[data-reveal]");
@@ -486,6 +635,7 @@
     initDrops();
     initSprint();
     initFetch();
+    initTen();
     initDust();
   }
 
