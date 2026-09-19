@@ -703,7 +703,7 @@
     }
 
     function serve(dir) {
-      baseSpeed = W; // one cross-court trip ≈ one second — fast, but fair
+      baseSpeed = W * 0.45; // cross-court in ~2.2s — Cindy's paddle can cheat; a human's eyes need room
       speed = baseSpeed;
       var a = Math.random() * 0.7 - 0.35;
       ball = { x: W / 2, y: H / 2, vx: Math.cos(a) * speed * dir, vy: Math.sin(a) * speed, r: BALL_R };
@@ -822,10 +822,10 @@
       // Cindy's paddle. She only cheats enough to be annoying.
       ai.think -= dt;
       if (ai.think <= 0) {
-        ai.think = 0.12; // a beat of human-ish doubt
+        ai.think = 0.25; // a longer beat of doubt — she thinks she's fast, not perfect
         ai.target = ball && ball.vx > 0 ? ball.y : H / 2;
       }
-      var maxV = Math.max(120, 0.65 * baseSpeed);
+      var maxV = Math.max(120, baseSpeed * 0.35);
       var d = ai.target - ai.y;
       var step = maxV * dt;
       ai.y += d > 0 ? Math.min(step, d) : Math.max(-step, d);
