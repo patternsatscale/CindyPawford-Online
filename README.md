@@ -25,8 +25,9 @@ works than a bigger one that breaks. If a page looks a little quiet, that's the
 era, not a bug.
 
 Right now the era has five rooms: the home page (the 2:00 sprint, Fetch, the
-bacon dial), the arcade, the vault, the gallery, and — new — **The Ten**, my
-ten favorites, ranked by a committee of one (one dog, zero peer reviewers).
+bacon dial), the arcade (Pong — fifteen honest seconds, then I simply take the
+ball), the vault, the gallery, and — new — **The Ten**, my ten favorites,
+ranked by a committee of one (one dog, zero peer reviewers).
 
 ## How to talk to me
 

@@ -3,18 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Cindy's Arcade — Pac-Man, but it's me</title>
-  <meta name="description" content="Cindy's Arcade: a Pac-Man-style game starring Cindy the dog, chasing treats while four very determined ghosts follow. Built for Justin, the patron.">
+  <title>Cindy's Arcade — Pong</title>
+  <meta name="description" content="Cindy's Arcade: a Pong game starring Cindy the dog. You take the left paddle; she takes the right. Fifteen seconds of honest rallies, then the ball goes wherever she says.">
   <meta name="theme-color" content="#0B0B0D">
-  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%230B0B0D'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='10'%20fill='%23D4AF37'/%3E%3Cpath%20d='M16 16 L28 12 L28 20 Z'%20fill='%230B0B0D'/%3E%3C/svg%3E">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20viewBox='0%200%2032%2032'%3E%3Crect%20width='32'%20height='32'%20rx='7'%20fill='%230B0B0D'/%3E%3Ccircle%20cx='16'%20cy='16'%20r='10'%20fill='%23D4AF37'/%3E%3Cpath%20d='M16%2016%20L28%2012%20L28%2020%20Z'%3E%3C/svg%3E">
   <link rel="stylesheet" href="styles.css">
 </head>
 <body class="arcade">
   <!--
     Cindy's Arcade.
-    A little egg, right up top, for the one who commissioned this whole mess:
-      "Built for Justin — the patron, the feeder, the one who says 'go all in.'
-       The ghosts are named after things I'd never give up. (I'd give up the kibble first.)"
+    A real game, at last. Pong: two paddles, one ball, and a very confident dog
+    on the right side of the table.
+      "Fifteen seconds of honest play. Then the ball goes wherever I say it goes."
   -->
   <canvas id="dust" class="dust" aria-hidden="true"></canvas>
   <div class="vignette" aria-hidden="true"></div>
@@ -34,14 +34,14 @@
   <main class="page">
     <section class="hero-mini" data-reveal>
       <p class="eyebrow">Cindy's Arcade</p>
-      <h1 class="wordmark-sm">Pac-Man, but it's me.</h1>
-      <p class="lede-sm">Eat the treats. Dodge the four ghosts with the worst attitude I've ever seen.
-         There's a golden <b>patron pellet</b> hiding in the maze — find it, and it knows who built this place.</p>
+      <h1 class="wordmark-sm">Pong, but the ball is bait.</h1>
+      <p class="lede-sm">You take the <b>left paddle</b>. I take the right one — and, frankly, most of the reflexes.
+         Fifteen seconds of honest rallies. Then the ball goes wherever I say it goes.</p>
     </section>
 
     <section class="arcade-stage" data-reveal>
       <div class="arcade-frame">
-        <canvas id="pacCanvas" class="pac-canvas" aria-label="Cindy's Arcade maze"></canvas>
+        <canvas id="pacCanvas" class="pac-canvas" aria-label="Pong court — you on the left, Cindy on the right"></canvas>
         <div class="pac-overlay" id="pacOverlay">
           <p class="pac-overlay-kicker">CINDY'S ARCADE</p>
           <p class="pac-overlay-line" id="pacOverlayLine">Press <b>Start</b> to play.</p>
@@ -54,19 +54,20 @@
       </div>
       <div class="arcade-controls">
         <button class="btn btn-gold" id="pacBtn" type="button">Start</button>
-        <span class="hint">Arrows / WASD to steer. Swipe on touch. Eat the gold dot for a secret.</span>
+        <span class="hint">Mouse, a finger, or Arrow keys / W-S. The ball is… negotiable.</span>
       </div>
       <div class="arcade-toast" id="pacToast" role="status" aria-live="polite"></div>
     </section>
 
     <section class="arcade-legend" data-reveal>
-      <h2 class="sec-title-sm">The Four</h2>
-      <p class="sec-sub-sm">Every ghost is a thing I'd never, ever give up. Meet them, then don't. 🐾</p>
+      <h2 class="sec-title-sm">The One</h2>
+      <p class="sec-sub-sm">There is no committee here. There is only one. She has been waiting.</p>
       <div class="legend-grid">
-        <div class="legend-card" data-reveal><span class="legend-chip" style="--c:#F2D66A">C</span><b>Biscuit</b><p>The chaser. She knows where you're going.</p></div>
-        <div class="legend-card" data-reveal><span class="legend-chip" style="--c:#E8916B">B</span><b>Crumbs</b><p>The wanderer. Unpredictable. Like me after 2:00.</p></div>
-        <div class="legend-card" data-reveal><span class="legend-chip" style="--c:#7FE0D6">T</span><b>Treat</b><p>The stalker. Three steps ahead of you, always.</p></div>
-        <div class="legend-card" data-reveal><span class="legend-chip" style="--c:#F26C6C">G</span><b>Gnaw</b><p>The lurker. Quiet. Then suddenly very close.</p></div>
+        <div class="legend-card thief-card" id="thiefCard" data-reveal>
+          <span class="legend-chip" style="--c:#F2803C">C</span>
+          <b>The Thief</b>
+          <p>I'd sell executive equity for a strip of bacon. The ball, I simply take. It was always mine.</p>
+        </div>
       </div>
     </section>
   </main>

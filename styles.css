@@ -811,3 +811,18 @@ body {
   .ten-glyph { display: none; }
   .site-nav a { font-size: .7rem; }
 }
+
+/* ═══════════════════════════════════════════
+   The Arcade — Pong (the first real game)
+   ═══════════════════════════════════════════ */
+.pac-canvas { aspect-ratio: 16 / 9; }
+
+/* game-over state, when the ball is gone for good */
+.pac-overlay.stolen { background: rgba(20, 11, 4, .82); }
+.pac-overlay.stolen .pac-overlay-kicker { color: #F2803C; }
+.pac-overlay.stolen .pac-overlay-line { color: var(--ink); }
+
+/* The One's card — the only legend that matters */
+.legend-card.thief-card { border-color: rgba(242, 128, 60, .3); }
+.legend-card.thief-card:hover { border-color: #F2803C; }
+.legend-card.thief-card b { color: #F2803C; }

@@ -626,6 +626,382 @@
   }
 
   /* ──────────────────────────────────────
+     10 · THE ARCADE — PONG (the first real game)
+     Fifteen seconds of honest Pong. Then the thief arrives.
+     She was always faster.
+     ────────────────────────────────────── */
+  function initPong() {
+    var canvas = document.getElementById("pacCanvas");
+    if (!canvas) return; // no arcade on this page — nobody notices
+    var scoreEl = document.getElementById("pacScore");
+    var bestEl = document.getElementById("pacBest");
+    var livesEl = document.getElementById("pacLives");
+    var btn = document.getElementById("pacBtn");
+    var overlay = document.getElementById("pacOverlay");
+    var overlayLine = document.getElementById("pacOverlayLine");
+    var toastEl = document.getElementById("pacToast");
+    if (!scoreEl || !bestEl || !livesEl || !btn || !overlay) return;
+
+    var BEST_KEY = "cindyPongBest";
+    var TRAP_AT = 15.0;   // fifteen seconds. That's the whole deal.
+    var PAD_W = 10;
+    var PAD_X = 17;       // player paddle at x=17..27, face at 27
+    var BALL_R = 8;
+    var ORANGE = "#F2803C";
+    var INK = "#0B0B0D";
+
+    var best = readBest(BEST_KEY);
+    bestEl.textContent = best;
+
+    var state = "idle";   // idle | playing | trap | over
+    var stolen = false;   // once she has the ball, she keeps it
+    var trapFired = false;// fires exactly once, session-wide
+    var trapElapsed = 0;
+    var trapPhase = "";   // tell | run
+    var trapT = 0;
+    var raf = 0, lastTs = 0, active = false;
+
+    var W = 0, H = 0;
+    var paddle = { y: 0, h: 0 };
+    var ai = { y: 0, target: 0, think: 0 };
+    var ball = null;      // {x,y,vx,vy,r} — null once she grabs it
+    var speed = 0, baseSpeed = 0;
+    var score = 0, lives = 3;
+    var thief = null;     // {x,y,dir,speed,size}
+    var inMouth = false, mouthT = 0;
+    var toastTimer = 0;
+    var keys = { up: false, down: false };
+
+    function clamp(v, lo, hi) { return v < lo ? lo : (v > hi ? hi : v); }
+
+    function hud() {
+      scoreEl.textContent = score;
+      livesEl.textContent = lives;
+      bestEl.textContent = best;
+    }
+
+    function arcToast(msg, ms) {
+      if (!toastEl) return;
+      toastEl.textContent = msg;
+      toastEl.classList.add("show");
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(function () { toastEl.classList.remove("show"); }, ms || 2200);
+    }
+
+    function fit() {
+      var f = fitCanvas(canvas);
+      W = f.w; H = f.h;
+      paddle.h = Math.max(40, Math.round(H * 0.30));
+      if (!paddle.y) paddle.y = H / 2;
+      if (!ai.y) ai.y = H / 2;
+      paddle.y = clamp(paddle.y, paddle.h / 2 + 4, H - paddle.h / 2 - 4);
+      ai.y = clamp(ai.y, paddle.h / 2 + 4, H - paddle.h / 2 - 4);
+      if (ball) {
+        ball.x = clamp(ball.x, BALL_R, W - BALL_R);
+        ball.y = clamp(ball.y, BALL_R, H - BALL_R);
+      }
+    }
+
+    function serve(dir) {
+      baseSpeed = W * 0.45; // cross-court in ~2.2s — Cindy's paddle can cheat; a human's eyes need room
+      speed = baseSpeed;
+      var a = Math.random() * 0.7 - 0.35;
+      ball = { x: W / 2, y: H / 2, vx: Math.cos(a) * speed * dir, vy: Math.sin(a) * speed, r: BALL_R };
+      paddle.y = H / 2;
+      ai.y = H / 2; ai.target = H / 2; ai.think = 0;
+    }
+
+    function startGame() {
+      score = 0; lives = 3;
+      stolen = false;
+      hud();
+      var kicker = overlay.querySelector(".pac-overlay-kicker");
+      if (kicker) kicker.textContent = "CINDY'S ARCADE";
+      overlay.classList.remove("stolen");
+      overlay.classList.add("hidden");
+      btn.textContent = "Playing\u2026";
+      serve(Math.random() < 0.5 ? 1 : -1);
+      state = "playing";
+      lastTs = 0;
+      if (!active) { active = true; raf = requestAnimationFrame(frame); }
+    }
+
+    function gameOverNormal() {
+      state = "over"; active = false;
+      cancelAnimationFrame(raf);
+      btn.textContent = "Start";
+      var kicker = overlay.querySelector(".pac-overlay-kicker");
+      if (kicker) kicker.textContent = "CINDY'S ARCADE";
+      overlayLine.innerHTML = "GAME OVER \u2014 " + score + " to you. She accepts the defeat, briefly.";
+      overlay.classList.remove("stolen");
+      overlay.classList.remove("hidden");
+      render();
+    }
+
+    function triggerTrap() {
+      // the tell, then the run. Fifteen seconds was the whole deal.
+      trapFired = true;
+      state = "trap";
+      trapPhase = "tell";
+      trapT = 0;
+      arcToast("Wait. I hear something.", 700);
+    }
+
+    function initThief() {
+      var size = BALL_R * 3; // about three times the ball. Exactly as threatening.
+      var fromLeft = ball && ball.x < W / 2;
+      thief = {
+        x: fromLeft ? -size * 1.5 : W + size * 1.5,
+        y: ball ? clamp(ball.y, size, H - size) : H / 2,
+        dir: fromLeft ? 1 : -1,
+        speed: (W + size * 4) / 1.4, // snappy, but a fair ~1.4s dash
+        size: size
+      };
+    }
+
+    function endSteal() {
+      state = "over"; active = false;
+      cancelAnimationFrame(raf);
+      stolen = true;
+      thief = null; inMouth = false; ball = null;
+      btn.textContent = "Nice try.";
+      var kicker = overlay.querySelector(".pac-overlay-kicker");
+      if (kicker) kicker.textContent = "THE ONE";
+      overlayLine.innerHTML = "The ball was never yours. \u2014 C";
+      overlay.classList.add("stolen");
+      overlay.classList.remove("hidden");
+      render();
+    }
+
+    function hitPaddle(isPlayer) {
+      var py = isPlayer ? paddle.y : ai.y;
+      speed = Math.min(speed * 1.03, baseSpeed * 2);
+      var off = clamp((ball.y - py) / (paddle.h / 2 + ball.r), -1, 1);
+      var ang = off * (Math.PI / 3); // max ~60\u00B0 off horizontal
+      var dir = isPlayer ? 1 : -1;
+      ball.vx = Math.cos(ang) * speed * dir;
+      ball.vy = Math.sin(ang) * speed;
+      if (isPlayer) ball.x = PAD_X + PAD_W + ball.r + 1;
+      else ball.x = W - PAD_X - PAD_W - ball.r - 1;
+    }
+
+    function stepBall(dt, noScore) {
+      if (!ball) return;
+      ball.x += ball.vx * dt;
+      ball.y += ball.vy * dt;
+      if (ball.y - ball.r < 0) { ball.y = ball.r; ball.vy = Math.abs(ball.vy); }
+      if (ball.y + ball.r > H) { ball.y = H - ball.r; ball.vy = -Math.abs(ball.vy); }
+
+      if (ball.x + ball.r < 0) {
+        if (noScore) { ball.x = ball.r; ball.vx = Math.abs(ball.vx); return; }
+        lives--; hud();
+        if (lives <= 0) { gameOverNormal(); return; }
+        serve(1);
+        return;
+      }
+      if (ball.x - ball.r > W) {
+        if (noScore) { ball.x = W - ball.r; ball.vx = -Math.abs(ball.vx); return; }
+        score++;
+        if (score > best) { best = score; writeBest(BEST_KEY, best); }
+        hud();
+        serve(-1);
+        return;
+      }
+
+      if (noScore) return;
+      var face = PAD_X + PAD_W;
+      if (ball.vx < 0 && ball.x - ball.r <= face && ball.x > face - 60) {
+        if (Math.abs(ball.y - paddle.y) <= paddle.h / 2 + ball.r) hitPaddle(true);
+      }
+      var aface = W - PAD_X - PAD_W;
+      if (ball.vx > 0 && ball.x + ball.r >= aface && ball.x < aface + 60) {
+        if (Math.abs(ball.y - ai.y) <= paddle.h / 2 + ball.r) hitPaddle(false);
+      }
+    }
+
+    function stepAI(dt) {
+      // Cindy's paddle. She only cheats enough to be annoying.
+      ai.think -= dt;
+      if (ai.think <= 0) {
+        ai.think = 0.25; // a longer beat of doubt — she thinks she's fast, not perfect
+        ai.target = ball && ball.vx > 0 ? ball.y : H / 2;
+      }
+      var maxV = Math.max(120, baseSpeed * 0.35);
+      var d = ai.target - ai.y;
+      var step = maxV * dt;
+      ai.y += d > 0 ? Math.min(step, d) : Math.max(-step, d);
+      ai.y = clamp(ai.y, paddle.h / 2 + 4, H - paddle.h / 2 - 4);
+    }
+
+    function drawThief(ctx, t) {
+      var s = thief.size;
+      var wag = reduceMotion ? 0 : Math.sin(t * 16) * 0.35;
+      ctx.save();
+      ctx.translate(thief.x, thief.y);
+      ctx.scale(thief.dir, 1); // she always faces where she's going
+      // tail (wagging. obviously.)
+      ctx.strokeStyle = ORANGE;
+      ctx.lineWidth = 5;
+      ctx.lineCap = "round";
+      ctx.beginPath();
+      ctx.moveTo(-s * 0.85, -s * 0.1);
+      ctx.lineTo(-s * 1.45, -s * (0.75 + wag * 0.5));
+      ctx.stroke();
+      // body
+      ctx.fillStyle = ORANGE;
+      ctx.beginPath();
+      ctx.ellipse(0, 0, s, s * 0.72, 0, 0, 6.2832);
+      ctx.fill();
+      // head
+      ctx.beginPath();
+      ctx.arc(s * 0.9, -s * 0.4, s * 0.55, 0, 6.2832);
+      ctx.fill();
+      // ears
+      ctx.beginPath();
+      ctx.moveTo(s * 0.55, -s * 0.85);
+      ctx.lineTo(s * 0.95, -s * 1.4);
+      ctx.lineTo(s * 1.15, -s * 0.7);
+      ctx.closePath();
+      ctx.fill();
+      // one eye, so she reads as HER
+      ctx.fillStyle = INK;
+      ctx.beginPath();
+      ctx.arc(s * 1.05, -s * 0.45, s * 0.08, 0, 6.2832);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function render() {
+      var f = fitCanvas(canvas);
+      var ctx = f.ctx;
+      ctx.clearRect(0, 0, W, H);
+
+      // court
+      ctx.strokeStyle = "rgba(245,242,236,.08)";
+      ctx.lineWidth = 1;
+      ctx.strokeRect(10.5, 10.5, W - 21, H - 21);
+      ctx.beginPath();
+      ctx.setLineDash([6, 10]);
+      ctx.moveTo(W / 2, 14);
+      ctx.lineTo(W / 2, H - 14);
+      ctx.stroke();
+      ctx.setLineDash([]);
+
+      // paddles
+      ctx.fillStyle = "#E8C84A";
+      ctx.fillRect(PAD_X, paddle.y - paddle.h / 2, PAD_W, paddle.h);
+      ctx.fillStyle = "#D4AF37";
+      ctx.fillRect(W - PAD_X - PAD_W, ai.y - paddle.h / 2, PAD_W, paddle.h);
+
+      // ball — in play, or (briefly) in her mouth
+      var bx = null, by = null;
+      if (ball) { bx = ball.x; by = ball.y; }
+      else if (inMouth && thief && mouthT > 0) {
+        bx = thief.x + thief.dir * thief.size * 1.1;
+        by = thief.y - thief.size * 0.1;
+      }
+      if (bx !== null) {
+        ctx.beginPath();
+        ctx.arc(bx, by, BALL_R, 0, 6.2832);
+        ctx.fillStyle = "#F5F2EC";
+        ctx.fill();
+        ctx.strokeStyle = "#D4AF37";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+      }
+
+      if (thief) drawThief(ctx, trapT);
+    }
+
+    function frame(now) {
+      if (!active) return;
+      if (!lastTs) lastTs = now;
+      // capped dt everywhere: a backgrounded tab must never dump time at once
+      var dt = Math.min((now - lastTs) / 1000, 0.05);
+      lastTs = now;
+
+      var kv = (keys.down ? 1 : 0) - (keys.up ? 1 : 0);
+      if (kv) {
+        paddle.y = clamp(paddle.y + kv * 600 * dt, paddle.h / 2 + 4, H - paddle.h / 2 - 4);
+      }
+
+      if (state === "playing") {
+        trapElapsed += dt;
+        stepAI(dt);
+        stepBall(dt, false);
+        if (state === "playing" && !trapFired && trapElapsed >= TRAP_AT) triggerTrap();
+      } else if (state === "trap") {
+        trapT += dt;
+        stepAI(dt);
+        stepBall(dt, true); // she keeps serving herself; the score no longer matters
+        if (trapPhase === "tell") {
+          if (trapT >= 0.5) { trapPhase = "run"; initThief(); }
+        } else {
+          thief.x += thief.dir * thief.speed * dt;
+          if (ball) thief.y += (ball.y - thief.y) * Math.min(1, dt * 10);
+          if (ball && Math.abs(thief.x - ball.x) <= thief.size && Math.abs(thief.y - ball.y) <= thief.size * 1.2) {
+            ball = null; // grabbed. the physics table just lost a member.
+            inMouth = true;
+            mouthT = 0.15;
+          }
+          if (inMouth) mouthT -= dt;
+          var exitX = thief.dir > 0 ? W + thief.size * 2.5 : -thief.size * 2.5;
+          if (thief.dir > 0 && thief.x > exitX || thief.dir < 0 && thief.x < exitX) endSteal();
+        }
+      }
+
+      render();
+      if (active) raf = requestAnimationFrame(frame);
+    }
+
+    function pointerY(e) {
+      var rect = canvas.getBoundingClientRect();
+      return (e.clientY - rect.top) / rect.height * H;
+    }
+    function aim(e) {
+      if (state !== "playing" && state !== "trap") return;
+      paddle.y = clamp(pointerY(e), paddle.h / 2 + 4, H - paddle.h / 2 - 4);
+    }
+    canvas.addEventListener("pointermove", aim);
+    canvas.addEventListener("pointerdown", function (e) { e.preventDefault(); aim(e); });
+
+    var CONSUMED = { ArrowUp: "up", ArrowDown: "down", w: "up", W: "up", s: "down", S: "down" };
+    function setKey(e, on) {
+      var k = CONSUMED[e.key];
+      if (!k) return;
+      if (state !== "playing" && state !== "trap") return; // never hijack keys off-page
+      e.preventDefault();
+      keys[k] = on;
+    }
+    window.addEventListener("keydown", function (e) { setKey(e, true); });
+    window.addEventListener("keyup", function (e) { setKey(e, false); });
+
+    function onVis() {
+      if (document.hidden) {
+        if (active) { active = false; cancelAnimationFrame(raf); }
+        return;
+      }
+      if ((state === "playing" || state === "trap") && !active) {
+        // resume; the first frame's dt is zero, the cap catches the rest
+        active = true; lastTs = 0; raf = requestAnimationFrame(frame);
+      }
+    }
+    document.addEventListener("visibilitychange", onVis);
+
+    btn.addEventListener("click", function () {
+      if (stolen) { arcToast("She's still got it.", 1800); return; }
+      if (state === "playing" || state === "trap") return;
+      startGame();
+    });
+
+    window.addEventListener("resize", function () { fit(); if (!active) render(); });
+
+    fit();
+    hud();
+    render();
+  }
+
+  /* ──────────────────────────────────────
      Boot
      ────────────────────────────────────── */
   function boot() {
@@ -635,6 +1011,7 @@
     initDrops();
     initSprint();
     initFetch();
+    initPong();
     initTen();
     initDust();
   }
