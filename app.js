@@ -739,6 +739,7 @@
     }
 
     function triggerTrap() {
+      // the tell, then the run. Fifteen seconds was the whole deal.
       trapFired = true;
       state = "trap";
       trapPhase = "tell";
